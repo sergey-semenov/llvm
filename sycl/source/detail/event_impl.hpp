@@ -66,6 +66,7 @@ public:
   /// \param Self is a pointer to this event.
   void wait(std::shared_ptr<cl::sycl::detail::event_impl> Self) const;
 
+  void wait_without_cleanup(std::shared_ptr<cl::sycl::detail::event_impl> Self) const;
   /// Waits for the event.
   ///
   /// If any uncaught asynchronous errors occurred on the context that the

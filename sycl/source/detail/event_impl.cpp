@@ -208,6 +208,28 @@ void event_impl::wait(
 #endif
 }
 
+void event_impl::wait_without_cleanup(
+    std::shared_ptr<cl::sycl::detail::event_impl> Self) const {
+#ifdef XPTI_ENABLE_INSTRUMENTATION
+  void *TelemetryEvent = nullptr;
+  uint64_t IId;
+  std::string Name;
+  int32_t StreamID = xptiRegisterStream(SYCL_STREAM_NAME);
+  TelemetryEvent = instrumentationProlog(Name, StreamID, IId);
+#endif
+
+  if (MEvent)
+    // presence of MEvent means the command has been enqueued, so no need to
+    // go via the slow path event waiting in the scheduler
+    waitInternal();
+  else if (MCommand)
+    detail::Scheduler::getInstance().waitForEvent(Self);
+
+#ifdef XPTI_ENABLE_INSTRUMENTATION
+  instrumentationEpilog(TelemetryEvent, Name, StreamID, IId);
+#endif
+}
+
 void event_impl::wait_and_throw(
     std::shared_ptr<cl::sycl::detail::event_impl> Self) {
   Scheduler &Sched = Scheduler::getInstance();
