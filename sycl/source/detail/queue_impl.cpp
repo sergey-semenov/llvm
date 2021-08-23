@@ -10,6 +10,7 @@
 #include <CL/sycl/detail/memory_manager.hpp>
 #include <CL/sycl/detail/pi.hpp>
 #include <CL/sycl/device.hpp>
+#include <detail/config.hpp>
 #include <detail/event_impl.hpp>
 #include <detail/queue_impl.hpp>
 
@@ -64,7 +65,7 @@ event queue_impl::memset(const std::shared_ptr<detail::queue_impl> &Self,
   // Track only if we won't be able to handle it with piQueueFinish.
   // FIXME these events are stored for level zero until as a workaround, remove
   // once piEventRelease no longer calls wait on the event in the plugin.
-  if (!MSupportOOO || getPlugin().getBackend() == backend::level_zero)
+  if (!MSupportOOO || (getPlugin().getBackend() == backend::level_zero && !SYCLConfig<SYCL_FINISH>::get()))
     addSharedEvent(ResEvent);
   return ResEvent;
 }
@@ -83,7 +84,7 @@ event queue_impl::memcpy(const std::shared_ptr<detail::queue_impl> &Self,
   // Track only if we won't be able to handle it with piQueueFinish.
   // FIXME these events are stored for level zero until as a workaround, remove
   // once piEventRelease no longer calls wait on the event in the plugin.
-  if (!MSupportOOO || getPlugin().getBackend() == backend::level_zero)
+  if (!MSupportOOO || (getPlugin().getBackend() == backend::level_zero && !SYCLConfig<SYCL_FINISH>::get()))
     addSharedEvent(ResEvent);
   return ResEvent;
 }
@@ -103,7 +104,7 @@ event queue_impl::mem_advise(const std::shared_ptr<detail::queue_impl> &Self,
   // Track only if we won't be able to handle it with piQueueFinish.
   // FIXME these events are stored for level zero until as a workaround, remove
   // once piEventRelease no longer calls wait on the event in the plugin.
-  if (!MSupportOOO || getPlugin().getBackend() == backend::level_zero)
+  if (!MSupportOOO || (getPlugin().getBackend() == backend::level_zero && !SYCLConfig<SYCL_FINISH>::get()))
     addSharedEvent(ResEvent);
   return ResEvent;
 }
@@ -119,7 +120,7 @@ void queue_impl::addEvent(const event &Event) {
     // remove once piEventRelease no longer calls wait on the event in the
     // plugin.
     if (is_host() || !MSupportOOO ||
-        getPlugin().getBackend() == backend::level_zero)
+        (getPlugin().getBackend() == backend::level_zero && !SYCLConfig<SYCL_FINISH>::get()))
       addSharedEvent(Event);
   } else {
     std::weak_ptr<event_impl> EventWeakPtr{Eimpl};
@@ -135,7 +136,7 @@ void queue_impl::addSharedEvent(const event &Event) {
   // FIXME The assertion should be corrected once the Level Zero workaround is
   // removed.
   assert(is_host() || !MSupportOOO ||
-         getPlugin().getBackend() == backend::level_zero);
+        (getPlugin().getBackend() == backend::level_zero && !SYCLConfig<SYCL_FINISH>::get()));
   std::lock_guard<std::mutex> Lock(MMutex);
   // Events stored in MEventsShared are not released anywhere else aside from
   // calls to queue::wait/wait_and_throw, which a user application might not
@@ -270,7 +271,7 @@ void queue_impl::wait(const detail::code_location &CodeLoc) {
   // then handle the rest with piQueueFinish.
   // TODO the new workflow has worse performance with Level Zero, keep the old
   // behavior until this is addressed
-  if (!is_host() && getPlugin().getBackend() == backend::level_zero) {
+  if (!is_host() && getPlugin().getBackend() == backend::level_zero && !SYCLConfig<SYCL_FINISH>::get()) {
     for (std::weak_ptr<event_impl> &EventImplWeakPtr : WeakEvents)
       if (std::shared_ptr<event_impl> EventImplSharedPtr =
               EventImplWeakPtr.lock())
@@ -301,7 +302,7 @@ void queue_impl::wait(const detail::code_location &CodeLoc) {
       // FIXME these events are stored for level zero until as a workaround,
       // remove once piEventRelease no longer calls wait on the event in the
       // plugin.
-      if (Plugin.getBackend() == backend::level_zero) {
+      if (Plugin.getBackend() == backend::level_zero && !SYCLConfig<SYCL_FINISH>::get()) {
         SharedEvents.clear();
       }
       assert(SharedEvents.empty() &&
