@@ -4,7 +4,6 @@
 // `annotated_ptr::get()`
 
 #include "sycl/sycl.hpp"
-#include <sycl/ext/intel/fpga_extensions.hpp>
 
 #include <iostream>
 
@@ -14,10 +13,10 @@ using namespace sycl;
 using namespace ext::oneapi::experimental;
 using namespace ext::intel::experimental;
 
-// CHECK: @[[AnnStr:.*]] = private unnamed_addr addrspace(1) constant [19 x i8] c"{5921:\220\22}{44:\228\22}\00"
+// CHECK: @[[AnnStr:.*]] = private unnamed_addr addrspace(1) constant [9 x i8] c"{44:\228\22}\00"
 
 using ann_ptr_t1 =
-    annotated_ptr<int, decltype(properties(buffer_location<0>, alignment<8>))>;
+    annotated_ptr<int, decltype(properties(alignment<8>))>;
 
 SYCL_EXTERNAL void foo(ann_ptr_t1 a) {
   // CHECK: %ptr.addr = alloca ptr addrspace(4), align 8

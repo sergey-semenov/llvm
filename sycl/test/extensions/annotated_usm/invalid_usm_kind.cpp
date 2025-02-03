@@ -33,9 +33,6 @@ void testMissingUsmKind(sycl::queue &q) {
 
   // expected-error-re@sycl/ext/oneapi/experimental/annotated_usm/alloc_base.hpp:* {{static assertion failed due to requirement {{.+}}: USM kind is not specified. Please specify it as an argument or in the input property list.}}
   TEST((malloc_annotated<int>), N, q, properties{})
-
-  // expected-error-re@sycl/ext/oneapi/experimental/annotated_usm/alloc_base.hpp:* {{static assertion failed due to requirement {{.+}}: USM kind is not specified. Please specify it as an argument or in the input property list.}}
-  TEST((malloc_annotated<int>), N, dev, Ctx, properties{buffer_location<8>})
 }
 
 // Conflicting usm kinds between function name and property list
@@ -50,14 +47,6 @@ void testConflictingUsmKind(sycl::queue &q) {
   // expected-error-re@sycl/ext/oneapi/experimental/annotated_usm/alloc_util.hpp:* {{static assertion failed due to requirement {{.+}}: Input property list contains conflicting USM kind.}}
   // expected-error@+1 {{no matching function for call to 'malloc_shared_annotated'}}
   TEST(malloc_shared_annotated, N, dev, Ctx, properties{usm_kind_device});
-
-  // expected-error-re@sycl/ext/oneapi/experimental/annotated_usm/alloc_util.hpp:* {{static assertion failed due to requirement {{.+}}: Input property list contains conflicting USM kind.}}
-  // expected-error@+1 {{no matching function for call to 'malloc_shared_annotated'}}
-  TEST((malloc_shared_annotated<int>), N, q, properties{buffer_location<1>, usm_kind_host});
-
-  // expected-error-re@sycl/ext/oneapi/experimental/annotated_usm/alloc_util.hpp:* {{static assertion failed due to requirement {{.+}}: Input property list contains conflicting USM kind.}}
-  // expected-error@+1 {{no matching function for call to 'malloc_shared_annotated'}}
-  TEST((malloc_shared_annotated<int>), N, dev, Ctx, properties{buffer_location<2>, usm_kind_device});
   
   // expected-error-re@sycl/ext/oneapi/experimental/annotated_usm/alloc_util.hpp:* {{static assertion failed due to requirement {{.+}}: Input property list contains conflicting USM kind.}}
   // expected-error@+1 {{no matching function for call to 'malloc_host_annotated'}}
@@ -68,28 +57,12 @@ void testConflictingUsmKind(sycl::queue &q) {
   TEST(malloc_host_annotated, N, Ctx, properties{usm_kind_device});
 
   // expected-error-re@sycl/ext/oneapi/experimental/annotated_usm/alloc_util.hpp:* {{static assertion failed due to requirement {{.+}}: Input property list contains conflicting USM kind.}}
-  // expected-error@+1 {{no matching function for call to 'malloc_host_annotated'}}
-  TEST((malloc_host_annotated<int>), N, q, properties{buffer_location<1>, usm_kind_shared});
-
-  // expected-error-re@sycl/ext/oneapi/experimental/annotated_usm/alloc_util.hpp:* {{static assertion failed due to requirement {{.+}}: Input property list contains conflicting USM kind.}}
-  // expected-error@+1 {{no matching function for call to 'malloc_host_annotated'}}
-  TEST((malloc_host_annotated<int>), N, Ctx, properties{buffer_location<2>, usm_kind_device});
-
-  // expected-error-re@sycl/ext/oneapi/experimental/annotated_usm/alloc_util.hpp:* {{static assertion failed due to requirement {{.+}}: Input property list contains conflicting USM kind.}}
   // expected-error@+1 {{no matching function for call to 'malloc_device_annotated'}}
   TEST(malloc_device_annotated, N, q, properties{usm_kind_host});
 
   // expected-error-re@sycl/ext/oneapi/experimental/annotated_usm/alloc_util.hpp:* {{static assertion failed due to requirement {{.+}}: Input property list contains conflicting USM kind.}}
   // expected-error@+1 {{no matching function for call to 'malloc_device_annotated'}}
   TEST(malloc_device_annotated, N, dev, Ctx, properties{usm_kind_shared});
-
-  // expected-error-re@sycl/ext/oneapi/experimental/annotated_usm/alloc_util.hpp:* {{static assertion failed due to requirement {{.+}}: Input property list contains conflicting USM kind.}}
-  // expected-error@+1 {{no matching function for call to 'malloc_device_annotated'}}
-  TEST((malloc_device_annotated<int>), N, q, properties{buffer_location<1>, usm_kind_host});
-
-  // expected-error-re@sycl/ext/oneapi/experimental/annotated_usm/alloc_util.hpp:* {{static assertion failed due to requirement {{.+}}: Input property list contains conflicting USM kind.}}
-  // expected-error@+1 {{no matching function for call to 'malloc_device_annotated'}}
-  TEST((malloc_device_annotated<int>), N, dev, Ctx, properties{buffer_location<2>, usm_kind_shared});
 }
 
 // Duplicated properties (consistent or conflicting) exist in the property list
