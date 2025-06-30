@@ -8,6 +8,16 @@ string(REGEX REPLACE "/MT" "/MD" ${flag_var} "${${flag_var}}")
 endforeach()
 
 add_compile_definitions(SYCL2020_DISABLE_DEPRECATION_WARNINGS)
+# For simplicity, many tests use a mock image shared by multiple mock
+# kernels of the same name, all of which could be of different sizes.
+# Those tests typically don't care about the kernel arguments being set
+# via UR calls, but would have to specify kernel size just for a static
+# assertion in our headers. The assertion is intended to catch size mismatch
+# when using an external host compiler, which serves little purpose in unit
+# tests. This also would require us to provide different kernel name types for
+# such kernels. This would clash with the kernel name based caches, which are
+# tied to both kernel name types and strings.
+add_compile_definitions(__SYCL_IGNORE_KERNEL_SIZE_CHECK)
 
 # suppress warnings which came from Google Test sources
 if (CXX_SUPPORTS_SUGGEST_OVERRIDE_FLAG)

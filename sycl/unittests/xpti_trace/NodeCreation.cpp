@@ -63,7 +63,7 @@ TEST_F(NodeCreation, QueueParallelForWithGraphNode) {
     Q.submit(
         [&](handler &Cgh) {
           sycl::accessor acc(buf, Cgh, sycl::read_write);
-          Cgh.parallel_for<TestKernel<KernelSize>>(1, [=](sycl::id<1> idx) {});
+          Cgh.parallel_for<TestKernel>(1, [=](sycl::id<1> idx) {});
         },
         TestCodeLocation);
   } catch (sycl::exception &e) {
@@ -80,7 +80,7 @@ TEST_F(NodeCreation, QueueParallelForWithGraphNode) {
 TEST_F(NodeCreation, QueueParallelForWithNoGraphNode) {
   sycl::queue Q;
   try {
-    Q.parallel_for<TestKernel<KernelSize>>(1, [=](sycl::id<1> idx) {});
+    Q.parallel_for<TestKernel>(1, [=](sycl::id<1> idx) {});
   } catch (sycl::exception &e) {
     std::ignore = e;
   }
@@ -101,7 +101,7 @@ TEST_F(NodeCreation, QueueParallelForWithUserCodeLoc) {
     Q.submit(
         [&](handler &Cgh) {
           sycl::accessor acc(buf, Cgh, sycl::read_write);
-          Cgh.parallel_for<TestKernel<KernelSize>>(1, [=](sycl::id<1> idx) {});
+          Cgh.parallel_for<TestKernel>(1, [=](sycl::id<1> idx) {});
         },
         TestCodeLocation);
   } catch (sycl::exception &e) {
@@ -158,7 +158,7 @@ TEST_F(NodeCreation, CommandGraphRecord) {
       sycl::detail::tls_code_loc_t myLoc(
           {"LOCAL_CODELOC_FILE", "LOCAL_CODELOC_NAME", 1, 1});
       Q.submit([&](handler &Cgh) {
-        Cgh.parallel_for<TestKernel<KernelSize>>(1, [=](sycl::id<1> idx) {});
+        Cgh.parallel_for<TestKernel>(1, [=](sycl::id<1> idx) {});
       });
     }
 
@@ -196,7 +196,7 @@ TEST_F(NodeCreation, CommandGraphAddAPI) {
     auto doAddNode = [&](const sycl::detail::code_location &loc) {
       sycl::detail::tls_code_loc_t codeLoc(loc);
       return cmdGraph.add([&](handler &Cgh) {
-        Cgh.parallel_for<TestKernel<KernelSize>>(1, [=](sycl::id<1> idx) {});
+        Cgh.parallel_for<TestKernel>(1, [=](sycl::id<1> idx) {});
       });
     };
 

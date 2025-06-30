@@ -853,6 +853,8 @@ private:
 
     // TODO remove the ifdef once the kernel size builtin is supported.
 #ifdef __INTEL_SYCL_USE_INTEGRATION_HEADERS
+    // Macro for use in SYCL unit tests.
+#ifndef __SYCL_IGNORE_KERNEL_SIZE_CHECK
     static_assert(
         !KernelHasName ||
             sizeof(KernelType) == detail::getKernelSize<KernelName>(),
@@ -866,6 +868,7 @@ private:
         "In case of MSVC, passing "
         "-fsycl-host-compiler-options='/std:c++latest' "
         "might also help.");
+#endif
 #endif
     // Empty name indicates that the compilation happens without integration
     // header, so don't perform things that require it.
