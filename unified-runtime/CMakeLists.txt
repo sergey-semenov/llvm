@@ -7,6 +7,7 @@ cmake_minimum_required(VERSION 3.20.0 FATAL_ERROR)
 project(unified-runtime VERSION 0.12.0)
 cmake_policy(SET CMP0083 NEW) # PROPERTY POSITION_INDEPENDENT_CODE
 
+add_definitions(-g -O0)
 # Check if unified runtime is built as a standalone project.
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR OR UR_STANDALONE_BUILD)
     set(UR_STANDALONE_BUILD TRUE)

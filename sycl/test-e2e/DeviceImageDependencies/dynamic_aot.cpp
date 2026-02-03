@@ -1,8 +1,7 @@
 // Test -fsycl-allow-device-image-dependencies with dynamic libraries and AOT.
 
-// REQUIRES: ocloc, gpu, target_spir
 
-// DEFINE: %{aot_options} = -fsycl -fsycl-targets=spir64_gen -Xsycl-target-backend=spir64_gen %gpu_aot_target_opts -DUSE_AOT
+// DEFINE: %{aot_options} = -g -O0 -fsycl -fsycl-targets=spir64_gen -Xsycl-target-backend=spir64_gen %gpu_aot_target_opts -DUSE_AOT
 // DEFINE: %{dynamic_lib_options} = %{aot_options} %fPIC %shared_lib -fsycl-allow-device-image-dependencies -I %S/Inputs %if windows %{-DMAKE_DLL %}
 // DEFINE: %{dynamic_lib_suffix} = %if windows %{dll%} %else %{so%}
 
@@ -19,7 +18,3 @@
 // RUN:   %{-L%t.dir -ldevice_a -ldevice_b -ldevice_c -ldevice_d -Wl,-rpath=%t.dir%}
 
 // RUN: %{run} %t.dir/%{t:stem}.out
-
-// Remove once the Level Zero runtime supports native binaries in the program
-// module extension.
-// UNSUPPORTED: level_zero
