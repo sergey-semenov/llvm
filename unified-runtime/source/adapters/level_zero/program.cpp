@@ -457,14 +457,18 @@ ur_result_t urProgramLinkExp(
       ur_program_handle_t Program = phPrograms[I];
       CodeSizes[I] = Program->getCodeSize();
       CodeBufs[I] = Program->getCode();
+    if (CommonCodeFormat != ur_program_handle_t_::CodeFormat::Native && CommonCodeFormat != ur_program_handle_t_::CodeFormat::Unknown) {
       SpecConstShims.emplace_back(Program);
       SpecConstPtrs[I] = SpecConstShims[I].ze();
+    }
     }
 
     ZeExtModuleDesc.count = count;
     ZeExtModuleDesc.inputSizes = CodeSizes.data();
     ZeExtModuleDesc.pInputModules = CodeBufs.data();
-    ZeExtModuleDesc.pConstants = SpecConstPtrs.data();
+    if (CommonCodeFormat != ur_program_handle_t_::CodeFormat::Native && CommonCodeFormat != ur_program_handle_t_::CodeFormat::Unknown) {
+      ZeExtModuleDesc.pConstants = SpecConstPtrs.data();
+     }
 
     ZeStruct<ze_module_desc_t> ZeModuleDesc;
     ZeModuleDesc.pNext = &ZeExtModuleDesc;
@@ -473,6 +477,7 @@ ur_result_t urProgramLinkExp(
       ZeModuleDesc.format = ZE_MODULE_FORMAT_IL_SPIRV;
       break;
     case ur_program_handle_t_::CodeFormat::Native:
+    case ur_program_handle_t_::CodeFormat::Unknown:
       ZeModuleDesc.format = ZE_MODULE_FORMAT_NATIVE;
       break;
     default:
@@ -521,12 +526,18 @@ ur_result_t urProgramLinkExp(
     ur_program_handle_t_ *UrProgram = new ur_program_handle_t_(hContext);
     *phProgram = reinterpret_cast<ur_program_handle_t>(UrProgram);
     for (uint32_t i = 0; i < numDevices; i++) {
-
       // Call the Level Zero API to compile, link, and create the module.
       ze_device_handle_t ZeDevice = phDevices[i]->ZeDevice;
       ze_context_handle_t ZeContext = hContext->getZeHandle();
       ze_module_handle_t ZeModule = nullptr;
       ze_module_build_log_handle_t ZeBuildLog = nullptr;
+
+      if (CommonCodeFormat == ur_program_handle_t_::CodeFormat::Native || CommonCodeFormat ==  ur_program_handle_t_::CodeFormat::Unknown) {
+        for (uint32_t I = 0; I < count; I++) {
+          CodeSizes[I] = phPrograms[I]->getCodeSize(ZeDevice);
+	  CodeBufs[I] = phPrograms[I]->getCode(ZeDevice);
+	}
+      }
 
       // Build flags may be different for different devices, so handle them
       // here. Clear values of the previous device first.
